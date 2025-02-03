@@ -27,3 +27,8 @@
 
 This implementation achieves an output rate of **39 tokens/second** on an **RTX 4060**, outperforming Llama.cpp and ExLlamaV2, which typically run between **32-35 tokens/second**.
 
+## Miscellaneous
+You can also find my exl2 quantization on Huggingface:
+https://huggingface.co/patrickbdevaney/deepseek-r1-qwen-7b-q6-exl2
+
+It is easily used with text gen webui. You can also just download a GGUF of this model and run it on llama.cpp or text gen webui.
