@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat with AI</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .chat-container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .chat-box {
+            height: 300px;
+            overflow-y: scroll;
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 10px;
+            border: 1px solid #ddd;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        .user-msg {
+            color: #333;
+            padding: 5px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            background-color: #e0f7fa;
+        }
+        .ai-msg {
+            color: #333;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            background-color: #f1f8e9;
+            border-left: 4px solid #81c784;
+            position: relative;
+        }
+        .input-box {
+            width: 100%;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        .button {
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .button:hover {
+            background-color: #0056b3;
+        }
+        .copy-btn {
+            background-color: #4CAF50;
+            color: white;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            position: absolute;
+            top: 5px;
+            right: 5px;
+        }
+        .copy-btn:hover {
+            background-color: #45a049;
+        }
+        .token-info {
+            font-size: 14px;
+            margin-top: 10px;
+            color: #555;
+            white-space: pre-line;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-box" id="chatBox"></div>
+        <input type="text" id="userInput" class="input-box" placeholder="Type your message..." />
+        <button class="button" onclick="sendMessage()">Send</button>
+        <div class="token-info" id="tokenInfo"></div>
+    </div>
+
+    <script>
+        async function sendMessage() {
+            const userInput = document.getElementById('userInput').value;
+            if (!userInput.trim()) return;
+
+            const chatBox = document.getElementById('chatBox');
+            chatBox.innerHTML += `<div class="user-msg"><b>You:</b> ${userInput}</div>`;
+
+            const response = await fetch('/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ user_input: userInput }),
+            });
+
+            const data = await response.json();
+            const modelResponse = data.response;
+            
+            const aiMsgDiv = document.createElement('div');
+            aiMsgDiv.classList.add('ai-msg');
+            aiMsgDiv.innerHTML = `<b>AI:</b> <pre>${modelResponse}</pre>`;
+            
+            const copyBtn = document.createElement('button');
+            copyBtn.classList.add('copy-btn');
+            copyBtn.innerText = 'Copy';
+            copyBtn.onclick = function () {
+                navigator.clipboard.writeText(modelResponse);
+                copyBtn.innerText = 'Copied!';
+                setTimeout(() => (copyBtn.innerText = 'Copy'), 2000);
+            };
+            
+            aiMsgDiv.appendChild(copyBtn);
+            chatBox.appendChild(aiMsgDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            // Display token-related information
+            document.getElementById('tokenInfo').innerText = `Tokens used: ${data.tokens}
+Tokens per second: ${data.tokens_per_second}
+Total processing time: ${data.generation_time} seconds`;
+
+            document.getElementById('userInput').value = '';
+        }
+    </script>
+</body>
+</html>
