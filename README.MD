@@ -34,7 +34,7 @@ https://huggingface.co/patrickbdevaney/deepseek-r1-qwen-7b-q6-exl2
 It is easily used with text gen webui. You can also just download a GGUF of this model and run it on llama.cpp or text gen webui.
 
 
-Trying to stream responses with VLLM is awful. I resolved that its better to stick with full prompt evaluation and completion, as this mitigates text duplication in streaming and you get full coherent, semantically contiguous responses.
+Trying to stream responses with VLLM using a custom implementation did not work well. I resolved that its better to stick with full prompt evaluation and completion, as this mitigates text duplication in streaming and you get full coherent, semantically contiguous responses.
 
 Whereas streaming is giivng some concurrency issue where it spams repetitive text thousands of times in the chat ui.
 
