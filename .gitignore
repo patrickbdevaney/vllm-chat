@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+*.log
+# local model directories (e.g. ./deepseek-r1-awq)
+*-awq/
+models/

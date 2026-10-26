@@ -1,3 +1,12 @@
+"""Streaming chat UI in front of vLLM's OpenAI-compatible server (scripts/serve.sh).
+
+Run:   python app/stream_ui.py         ->  http://localhost:8500
+Config (environment):
+  VLLM_API_URL       chat completions endpoint (default http://localhost:8000/v1/chat/completions)
+  SERVED_MODEL_NAME  must match --served-model-name in scripts/serve.sh (default deepseek-r1-awq)
+  HOST, PORT         bind address (default 127.0.0.1:8500)
+"""
+import os
 import json
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, StreamingResponse
@@ -5,7 +14,8 @@ import aiohttp
 
 app = FastAPI()
 
-VLLM_API_URL = "http://localhost:8000/v1/chat/completions"
+VLLM_API_URL = os.environ.get("VLLM_API_URL", "http://localhost:8000/v1/chat/completions")
+SERVED_MODEL_NAME = os.environ.get("SERVED_MODEL_NAME", "deepseek-r1-awq")
 
 HTML_PAGE = """
 <!DOCTYPE html>
@@ -78,7 +88,7 @@ HTML_PAGE = """
                     responseElement.scrollTop = responseElement.scrollHeight;
                     
                     // Update tokens and elapsed time
-                    const tokens = chunk.split(/\s+/).filter(Boolean).length;
+                    const tokens = chunk.split(/\\s+/).filter(Boolean).length;
                     totalTokens += tokens;
                     const elapsedTime = (Date.now() - startTime) / 1000;
                     const tokensPerSecond = (totalTokens / elapsedTime).toFixed(2);
@@ -129,7 +139,7 @@ async def stream_generator(prompt: str):
     async with aiohttp.ClientSession() as session:
         headers = {"Content-Type": "application/json"}
         payload = {
-            "model": "deepseek-r1-awq",
+            "model": SERVED_MODEL_NAME,
             "messages": [{"role": "user", "content": prompt}],
             "stream": True
         }
@@ -182,4 +192,4 @@ async def chat(request: Request):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8500)
+    uvicorn.run(app, host=os.environ.get("HOST", "127.0.0.1"), port=int(os.environ.get("PORT", "8500")))
